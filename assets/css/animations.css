@@ -1,0 +1,21 @@
+.logo-path {
+    stroke-dasharray: 150;
+    stroke-dashoffset: 150;
+    animation: drawLogo 1.5s ease-out forwards;
+}
+
+@keyframes drawLogo {
+    0% { stroke-dashoffset: 150; }
+    100% { stroke-dashoffset: 0; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

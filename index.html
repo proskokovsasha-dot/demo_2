@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ТочкаСхода — Знакомства</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/animations.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--background);
+        }
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+        }
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="logo-container">
+            <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path class="logo-path" d="M20,50 Q35,20 50,50 T80,50" 
+                      stroke="#D7303B" 
+                      stroke-width="8" 
+                      fill="none"
+                      stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <div class="app-container" id="appContainer" style="display: none;">
+        <!-- Главный экран -->
+        <div class="screen active" id="mainScreen">
+            <div class="logo-container">
+                <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path class="logo-path" d="M20,50 Q35,20 50,50 T80,50" 
+                          stroke="var(--primary)" 
+                          stroke-width="8" 
+                          fill="none"
+                          stroke-linecap="round"/>
+                </svg>
+            </div>
+            <h1 class="app-title">ТочкаСхода</h1>
+            <p class="app-subtitle">Место, где пересекаются ваши пути</p>
+            <button class="btn pulse" id="startBtn">Начать знакомства</button>
+        </div>
+
+        <!-- Форма регистрации -->
+        <div class="screen" id="registrationForm"></div>
+
+        <!-- Экран профиля -->
+        <div class="screen" id="profileView">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar"></div>
+                    <div class="profile-info">
+                        <h1 class="profile-name" id="profileName"></h1>
+                        <div class="profile-meta">
+                            <span id="profileAge"></span>
+                            <span id="profileZodiac"></span>
+                            <span id="profileCity"></span>
+                            <span id="profileDistance"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-content">
+                    <div class="profile-section">
+                        <h3 class="section-title">О себе</h3>
+                        <div class="profile-description" id="profileDescription"></div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3 class="section-title">Ищу</h3>
+                        <div class="profile-looking-for" id="profileLookingFor"></div>
+                    </div>
+
+                    <!-- Новый раздел для интересов -->
+                    <div class="profile-section">
+                        <h3 class="section-title">Интересы</h3>
+                        <div class="profile-interests" id="profileInterests"></div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3 class="section-title">Фото</h3>
+                        <div class="profile-photos" id="profilePhotos"></div>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <button class="btn btn-edit" id="editBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Редактировать
+                    </button>
+                    <button class="btn btn-secondary" id="newProfileBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14"></path>
+                            <path d="M5 12h14"></path>
+                        </svg>
+                        Новый профиль
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/components/ui.js"></script>
+    <script src="assets/js/components/form.js"></script>
+    <script src="assets/js/components/profile.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
