@@ -8,7 +8,13 @@ class FormHandler {
         localStorage.setItem('datingProfile', JSON.stringify(this.app.state.userData));
         
         document.documentElement.style.setProperty('--primary', color);
+        // Для корректного расчета primary-dark, нужно получить RGB компоненты
+        const rgb = this.hexToRgb(color);
+        if (rgb) {
+            document.documentElement.style.setProperty('--primary-rgb', `${rgb.r},${rgb.g},${rgb.b}`);
+        }
         document.documentElement.style.setProperty('--primary-dark', this.darkenColor(color, 20));
+        document.documentElement.style.setProperty('--primary-light', this.lightenColor(color, 40)); // Добавлено осветление
     }
 
     darkenColor(color, percent) {
@@ -18,6 +24,28 @@ class FormHandler {
         const G = Math.max(0, (num >> 8 & 0x00FF) - amt);
         const B = Math.max(0, (num & 0x0000FF) - amt);
         return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+    }
+
+    lightenColor(color, percent) {
+        const num = parseInt(color.replace('#', ''), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = Math.min(255, (num >> 16) + amt);
+        const G = Math.min(255, (num >> 8 & 0x00FF) + amt);
+        const B = Math.min(255, (num & 0x0000FF) + amt);
+        return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+    }
+
+    hexToRgb(hex) {
+        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
     }
 
     renderForm() {
@@ -54,8 +82,8 @@ class FormHandler {
             5: this.getCityStep(),
             6: this.getLookingForStep(),
             7: this.getInterestsStep(),
-            8: this.getPreferenceStep(), // Новый шаг для предпочтений
-            9: this.getColorAndPhotosStep() // Сдвинут на один шаг вперед
+            8: this.getPreferenceStep(),
+            9: this.getColorAndPhotosStep()
         };
         return stepContents[step] || '';
     }
@@ -63,6 +91,7 @@ class FormHandler {
     getNameStep() {
         return `
             <h2 class="section-title">Как вас зовут?</h2>
+            <p class="section-description">Это поможет другим узнать вас.</p>
             <input type="text" class="input-field" id="userName" 
                    placeholder="Ваше имя" 
                    value="${this.app.state.userData.name || ''}" required>
@@ -72,6 +101,7 @@ class FormHandler {
     getGenderStep() {
         return `
             <h2 class="section-title">Ваш пол</h2>
+            <p class="section-description">Выберите ваш пол.</p>
             <div class="tags-container">
                 <div class="tag ${this.app.state.userData.gender === 'male' ? 'selected' : ''}" 
                      data-gender="male">
@@ -88,6 +118,7 @@ class FormHandler {
     getAgeStep() {
         return `
             <h2 class="section-title">Сколько вам лет?</h2>
+            <p class="section-description">Ваш возраст должен быть от ${this.app.config.minAge} до ${this.app.config.maxAge} лет.</p>
             <input type="number" class="input-field" id="userAge" 
                    min="${this.app.config.minAge}" max="${this.app.config.maxAge}" 
                    placeholder="Ваш возраст" 
@@ -98,6 +129,7 @@ class FormHandler {
     getZodiacStep() {
         return `
             <h2 class="section-title">Ваш знак зодиака</h2>
+            <p class="section-description">Выберите ваш знак зодиака.</p>
             <select class="input-field" id="userZodiac">
                 <option value="">Выберите знак зодиака</option>
                 ${this.app.config.zodiacSigns.map(sign => `
@@ -112,10 +144,11 @@ class FormHandler {
     getCityStep() {
         return `
             <h2 class="section-title">Ваш город</h2>
+            <p class="section-description">Укажите город, в котором вы живете.</p>
             <input type="text" class="input-field" id="userCity" 
                    placeholder="Где вы живете?" 
                    value="${this.app.state.userData.city || ''}" required>
-            <p class="section-description">Разрешить доступ к геолокации?</p>
+            <p class="section-description" style="margin-top: 20px;">Разрешить доступ к геолокации для более точного поиска?</p>
             <div class="tags-container">
                 <div class="tag" id="allowLocationBtn">
                     🌍 Разрешить доступ
@@ -124,14 +157,14 @@ class FormHandler {
                     Пропустить
                 </div>
             </div>
-            <div id="locationStatus" style="margin-top: 15px; color: var(--text-secondary);"></div>
+            <div id="locationStatus" style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9rem;"></div>
         `;
     }
 
     getLookingForStep() {
         return `
             <h2 class="section-title">Что вы ищете?</h2>
-            <p class="section-description">Выберите один или несколько вариантов</p>
+            <p class="section-description">Выберите один или несколько вариантов, которые описывают ваши цели.</p>
             <div class="tags-container">
                 ${this.app.config.lookingForOptions.map(option => `
                     <div class="tag ${(this.app.state.userData.lookingFor || []).includes(option.id) ? 'selected' : ''}" 
@@ -146,7 +179,7 @@ class FormHandler {
     getInterestsStep() {
         return `
             <h2 class="section-title">Ваши интересы</h2>
-            <p class="section-description">Выберите до ${this.app.config.maxInterests} интересов</p>
+            <p class="section-description">Выберите до ${this.app.config.maxInterests} интересов, которые вам близки.</p>
             <div class="tags-container" id="interestsContainer">
                 ${this.app.config.interests.map(interest => `
                     <div class="tag ${this.app.state.userData.interests.includes(interest.id) ? 'selected' : ''}" 
@@ -158,11 +191,10 @@ class FormHandler {
         `;
     }
 
-    // Новый шаг: Кого вы ищете?
     getPreferenceStep() {
         return `
             <h2 class="section-title">Кого вы ищете?</h2>
-            <p class="section-description">Выберите, кого вы хотите видеть в подборке</p>
+            <p class="section-description">Выберите, кого вы хотите видеть в подборке анкет.</p>
             <div class="tags-container">
                 ${this.app.config.preferenceOptions.map(option => `
                     <div class="tag ${this.app.state.userData.preference === option.id ? 'selected' : ''}" 
@@ -177,6 +209,7 @@ class FormHandler {
     getColorAndPhotosStep() {
         return `
             <h2 class="section-title">Цвет профиля</h2>
+            <p class="section-description">Выберите основной цвет для вашего профиля.</p>
             <div class="color-palette">
                 ${this.app.config.colors.map(color => `
                     <div class="color-option ${this.app.state.userData.profileColor === color ? 'selected' : ''}" 
@@ -189,10 +222,10 @@ class FormHandler {
                 <label>Или выберите свой цвет</label>
             </div>
 
-            <h2 class="section-title" style="margin-top: 30px;">Ваши фото</h2>
-            <p class="section-description">Добавьте до ${this.app.config.maxPhotos} фото</p>
+            <h2 class="section-title" style="margin-top: 40px;">Ваши фото</h2>
+            <p class="section-description">Добавьте до ${this.app.config.maxPhotos} фото, чтобы сделать профиль ярче.</p>
             <div class="avatar-upload">
-                <label class="btn">
+                <label class="btn btn-secondary">
                     📸 Добавить фото
                     <input type="file" id="photoUpload" accept="image/*" hidden multiple>
                 </label>
@@ -207,7 +240,8 @@ class FormHandler {
                 `).join('')}
             </div>
 
-            <h2 class="section-title" style="margin-top: 30px;">О себе</h2>
+            <h2 class="section-title" style="margin-top: 40px;">О себе</h2>
+            <p class="section-description">Расскажите немного о себе, чтобы другие могли узнать вас лучше.</p>
             <textarea class="input-field" id="userDescription" 
                       placeholder="Я люблю путешествия, книги и..." rows="4">${this.app.state.userData.description || ''}</textarea>
         `;
@@ -231,7 +265,7 @@ class FormHandler {
         this.setupLocationHandlers();
         this.setupLookingForHandlers();
         this.setupInterestsHandlers();
-        this.setupPreferenceHandlers(); // Новый обработчик
+        this.setupPreferenceHandlers();
         this.setupColorHandlers();
         this.setupPhotoHandlers();
         this.setupEnterKeyHandler();
@@ -341,7 +375,6 @@ class FormHandler {
         });
     }
 
-    // Новый обработчик для предпочтений по полу
     setupPreferenceHandlers() {
         document.querySelectorAll('[data-preference]').forEach(tag => {
             tag.addEventListener('click', (e) => {
@@ -400,7 +433,6 @@ class FormHandler {
                 const index = parseInt(e.target.dataset.index);
                 const photoToDelete = this.app.state.userData.photos[index];
                 
-                // Если удаляем фото, которое является аватаркой
                 if (this.app.state.userData.avatar === photoToDelete) {
                     this.app.state.userData.avatar = this.app.state.userData.photos.length > 1 ? 
                         this.app.state.userData.photos.find((_, i) => i !== index) : null;
@@ -430,7 +462,7 @@ class FormHandler {
     }
 
     initColorSelection() {
-        const savedColor = this.app.state.userData.profileColor || '#D7303B';
+        const savedColor = this.app.state.userData.profileColor || '#FF6B6B';
         this.updateColorSelection(savedColor);
     }
 
@@ -438,9 +470,15 @@ class FormHandler {
         this.app.state.userData.profileColor = selectedColor;
         
         const darkerColor = this.darkenColor(selectedColor, 20);
+        const lighterColor = this.lightenColor(selectedColor, 40); // Используем новую функцию
+        const rgb = this.hexToRgb(selectedColor);
         
         document.documentElement.style.setProperty('--primary', selectedColor);
         document.documentElement.style.setProperty('--primary-dark', darkerColor);
+        document.documentElement.style.setProperty('--primary-light', lighterColor); // Устанавливаем новую переменную
+        if (rgb) {
+            document.documentElement.style.setProperty('--primary-rgb', `${rgb.r},${rgb.g},${rgb.b}`);
+        }
         
         this.updateColorPalette(selectedColor);
         this.updateCustomColorInput(selectedColor);
@@ -506,7 +544,7 @@ class FormHandler {
         
         if (nextStepEl) {
             nextStepEl.classList.add('active');
-            nextStepEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // nextStepEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); // Отключено, так как может мешать анимации
             this.focusCurrentField();
         }
     }
@@ -515,44 +553,44 @@ class FormHandler {
         switch(this.app.state.currentStep) {
             case 1:
                 if (!document.getElementById('userName').value.trim()) {
-                    alert('Введите ваше имя');
+                    alert('Пожалуйста, введите ваше имя.');
                     return false;
                 }
                 return true;
             case 2:
                 if (!this.app.state.userData.gender) {
-                    alert('Выберите ваш пол');
+                    alert('Пожалуйста, выберите ваш пол.');
                     return false;
                 }
                 return true;
             case 3:
                 const age = parseInt(document.getElementById('userAge').value);
                 if (isNaN(age) || age < this.app.config.minAge || age > this.app.config.maxAge) {
-                    alert(`Введите корректный возраст (${this.app.config.minAge}-${this.app.config.maxAge} лет)`);
+                    alert(`Пожалуйста, введите корректный возраст (от ${this.app.config.minAge} до ${this.app.config.maxAge} лет).`);
                     return false;
                 }
                 return true;
             case 5:
                 if (!document.getElementById('userCity').value.trim()) {
-                    alert('Укажите ваш город');
+                    alert('Пожалуйста, укажите ваш город.');
                     return false;
                 }
                 return true;
             case 6:
                 if (this.app.state.userData.lookingFor.length === 0) {
-                    alert('Укажите, что вы ищете');
+                    alert('Пожалуйста, укажите, что вы ищете.');
                     return false;
                 }
                 return true;
             case 7:
                 if (this.app.state.userData.interests.length === 0) {
-                    alert('Выберите хотя бы один интерес');
+                    alert('Пожалуйста, выберите хотя бы один интерес.');
                     return false;
                 }
                 return true;
-            case 8: // Валидация для нового шага предпочтений
+            case 8:
                 if (!this.app.state.userData.preference) {
-                    alert('Выберите, кого вы ищете');
+                    alert('Пожалуйста, выберите, кого вы ищете.');
                     return false;
                 }
                 return true;
@@ -575,7 +613,7 @@ class FormHandler {
             case 5:
                 this.app.state.userData.city = document.getElementById('userCity').value.trim();
                 break;
-            case 9: // Обновлен номер шага для описания
+            case 9:
                 this.app.state.userData.description = document.getElementById('userDescription').value.trim();
                 break;
         }
@@ -583,7 +621,7 @@ class FormHandler {
 
     focusCurrentField() {
         const activeStep = document.querySelector('.form-step.active');
-        const input = activeStep?.querySelector('input, textarea, select');
+        const input = activeStep?.querySelector('input:not([type="hidden"]), textarea, select');
         input?.focus();
     }
 

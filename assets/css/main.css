@@ -1,24 +1,24 @@
 :root {
-    --primary: #D7303B;
-    --primary-dark: #B71C1C;
-    --primary-light: #FFEBEE;
-    --text-primary: #2D3436;
-    --text-secondary: #636E72;
-    --background: #FFFFFF;
-    --surface: #F5F6FA;
-    --border: #DFE6E9; /* Используется для некоторых элементов, но не для input */
-    --error: #F44336;
-    --success: #4CAF50;
-    --warning: #FFC107;
+    --primary: #FF6B6B; /* Более мягкий красный */
+    --primary-dark: #E04F4F; /* Темнее для ховера */
+    --primary-light: #FFDCDC; /* Светлее для акцентов */
+    --text-primary: #2C3E50; /* Темный сине-серый для основного текста */
+    --text-secondary: #7F8C8D; /* Средний серый для второстепенного текста */
+    --background: #F8F9FA; /* Очень светлый серый фон */
+    --surface: #FFFFFF; /* Белый для карточек и элементов */
+    --border: #E0E0E0; /* Легкий серый для границ */
+    --success: #2ECC71; /* Зеленый */
+    --error: #E74C3C; /* Красный */
+    --warning: #F39C12; /* Оранжевый */
 
     --radius-sm: 8px;
     --radius-md: 12px;
-    --radius-lg: 16px;
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.15); /* Новый, более выраженный тень */
-    --transition-fast: 0.15s;
-    --transition-normal: 0.3s;
+    --radius-lg: 20px; /* Увеличенный радиус для более мягкого вида */
+    --shadow-sm: 0 4px 12px rgba(0,0,0,0.08); /* Более выраженная, но мягкая тень */
+    --shadow-md: 0 8px 20px rgba(0,0,0,0.12);
+    --shadow-lg: 0 12px 30px rgba(0,0,0,0.15);
+    --transition-fast: 0.2s;
+    --transition-normal: 0.4s; /* Немного медленнее для плавности */
 }
 
 * {
@@ -32,18 +32,24 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: var(--background);
     color: var(--text-primary);
-    line-height: 1.5;
+    line-height: 1.6; /* Увеличена межстрочная высота */
     min-height: 100vh;
-    padding: 20px;
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* Для размещения навигации сверху */
+    justify-content: flex-start;
     align-items: center;
+    overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
 }
 
 .app-container {
     width: 100%;
     max-width: 500px;
     margin: 0 auto;
+    padding: 20px; /* Общий паддинг для контента */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1; /* Занимает оставшееся пространство */
 }
 
 .loading-screen {
@@ -60,6 +66,7 @@ body {
     opacity: 0;
     height: 0;
     overflow: hidden;
+    padding-top: 20px; /* Добавляем отступ сверху для контента под навигацией */
 }
 
 .screen.active {
@@ -69,53 +76,130 @@ body {
 }
 
 .app-title {
-    font-size: 2.2rem;
-    font-weight: 700;
+    font-size: 2.8rem; /* Увеличен размер */
+    font-weight: 800; /* Более жирный */
     color: var(--primary);
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     line-height: 1.2;
+    letter-spacing: -0.03em; /* Небольшой кернинг */
 }
 
 .app-subtitle {
-    font-size: 1.1rem;
+    font-size: 1.2rem; /* Увеличен размер */
     color: var(--text-secondary);
-    margin-bottom: 32px;
-    max-width: 320px;
+    margin-bottom: 40px; /* Увеличен отступ */
+    max-width: 360px;
 }
 
 .section-title {
     font-size: 1.8rem;
+    font-weight: 700;
     margin-bottom: 20px;
-    color: var(--primary);
+    color: var(--text-primary); /* Изменен цвет на основной текст */
+    text-align: center; /* Центрируем заголовки секций */
 }
 
 .section-description {
     font-size: 1rem;
     color: var(--text-secondary);
     margin-bottom: 24px;
+    text-align: center; /* Центрируем описания секций */
 }
+
+/* Стили для верхнего навигационного меню */
+.top-navigation {
+    width: 100%;
+    background-color: var(--surface);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 10px 15px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast) ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.nav-btn svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--text-secondary);
+    transition: stroke var(--transition-fast) ease;
+}
+
+.nav-btn:hover {
+    color: var(--primary);
+}
+
+.nav-btn:hover svg {
+    stroke: var(--primary);
+}
+
+.nav-btn.active {
+    color: var(--primary);
+    background-color: var(--primary-light);
+}
+
+.nav-btn.active svg {
+    stroke: var(--primary);
+}
+
 
 @media (max-width: 480px) {
     body {
-        padding: 16px;
+        padding: 0; /* Убираем паддинг с body */
     }
     
+    .app-container {
+        padding: 16px; /* Паддинг для контента на мобильных */
+    }
+
     .app-title {
-        font-size: 1.8rem;
+        font-size: 2.2rem;
     }
     
     .section-title {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
+    }
+
+    .top-navigation {
+        padding: 8px 0;
+    }
+
+    .nav-btn {
+        font-size: 0.75rem;
+        padding: 8px 10px;
+    }
+    .nav-btn svg {
+        width: 20px;
+        height: 20px;
     }
 }
 
 @media (max-width: 360px) {
     .app-title {
-        font-size: 1.6rem;
+        font-size: 2rem;
     }
     
     .app-subtitle,
     .section-description {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
     }
 }

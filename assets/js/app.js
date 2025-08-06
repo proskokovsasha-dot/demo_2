@@ -1,7 +1,7 @@
 class DatingApp {
     constructor() {
         this.config = {
-            colors: ['#10367D', '#2D4D9E', '#4A64BF', '#677BDF', '#FF6B6B', '#FF8E8E', '#4ECDC4', '#7EDFD8', '#A05195', '#C27BB3', '#FDCB6E', '#FFEAA7'],
+            colors: ['#FF6B6B', '#4ECDC4', '#4A64BF', '#FDCB6E', '#A05195', '#2ECC71', '#E74C3C', '#3498DB', '#9B59B6', '#1ABC9C', '#F1C40F', '#E67E22'], // Обновленная палитра
             maxInterests: 5,
             minAge: 18,
             maxAge: 100,
@@ -41,7 +41,6 @@ class DatingApp {
                 { id: 'networking', name: 'Нетворкинг', emoji: '👔' },
                 { id: 'travel', name: 'Спутник для путешествий', emoji: '✈️' }
             ],
-            // Новые опции для предпочтений по полу
             preferenceOptions: [
                 { id: 'male', name: 'Мужчин', emoji: '👨' },
                 { id: 'female', name: 'Женщин', emoji: '👩' },
@@ -50,8 +49,9 @@ class DatingApp {
         };
 
         this.state = {
+            currentScreen: 'main', // Добавлено для отслеживания активного экрана
             currentStep: 1,
-            totalSteps: 9, // Увеличено на 1 для нового шага предпочтений
+            totalSteps: 9,
             userData: {
                 name: '',
                 gender: '',
@@ -61,8 +61,8 @@ class DatingApp {
                 description: '',
                 interests: [],
                 lookingFor: [],
-                preference: 'both', // Добавлено предпочтение по полу по умолчанию
-                profileColor: '#D7303B',
+                preference: 'both',
+                profileColor: '#FF6B6B', // Обновленный цвет по умолчанию
                 avatar: null,
                 photos: [],
                 location: { lat: null, lng: null }
@@ -94,9 +94,11 @@ class DatingApp {
 
             loadingScreen.addEventListener('transitionend', function handler() {
                 loadingScreen.style.display = 'none';
-                appContainer.style.display = 'block';
+                appContainer.style.display = 'flex'; // Изменено на flex для app-container
                 loadingScreen.removeEventListener('transitionend', handler); 
-            }, { once: true });
+                // После загрузки, активируем текущий экран
+                this.switchScreen(this.state.currentScreen);
+            }.bind(this), { once: true }); // Привязываем this
         }, 1500);
     }
 
@@ -107,18 +109,32 @@ class DatingApp {
             profileView: document.getElementById('profileView'),
             discoveryScreen: document.getElementById('discoveryScreen'),
             startBtn: document.getElementById('startBtn'),
-            startDiscoveryBtn: document.getElementById('startDiscoveryBtn'),
-            backToProfileFromDiscoveryBtn: document.getElementById('backToProfileFromDiscoveryBtn')
+            topNavigation: document.getElementById('topNavigation'), // Новый элемент
+            navButtons: document.querySelectorAll('.nav-btn') // Новые элементы
         };
     }
 
     bindEvents() {
         this.elements.startBtn.addEventListener('click', () => this.startRegistration());
-        if (this.elements.startDiscoveryBtn) {
-            this.elements.startDiscoveryBtn.addEventListener('click', () => this.startDiscovery());
-        }
-        if (this.elements.backToProfileFromDiscoveryBtn) {
-            this.elements.backToProfileFromDiscoveryBtn.addEventListener('click', () => this.showProfile());
+        
+        // Обработчики для кнопок навигации
+        this.elements.navButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const screenName = e.currentTarget.dataset.screen;
+                if (screenName === 'profile') {
+                    this.showProfile();
+                } else if (screenName === 'discovery') {
+                    this.startDiscovery();
+                } else if (screenName === 'main') {
+                    this.showMainScreen();
+                }
+            });
+        });
+
+        // Кнопка "Вернуться в профиль" на экране "Нет анкет"
+        const backToProfileFromDiscoveryBtn = document.getElementById('backToProfileFromDiscoveryBtn');
+        if (backToProfileFromDiscoveryBtn) {
+            backToProfileFromDiscoveryBtn.addEventListener('click', () => this.showProfile());
         }
     }
 
@@ -127,21 +143,23 @@ class DatingApp {
         if (savedProfile) {
             try {
                 this.state.userData = JSON.parse(savedProfile);
-                // Убедимся, что все новые поля инициализированы
                 if (!Array.isArray(this.state.userData.interests)) {
                     this.state.userData.interests = [];
                 }
                 if (!Array.isArray(this.state.userData.lookingFor)) {
                     this.state.userData.lookingFor = [];
                 }
-                if (!this.state.userData.preference) { // Инициализация нового поля
+                if (!this.state.userData.preference) {
                     this.state.userData.preference = 'both';
                 }
-                this.showProfile();
+                this.state.currentScreen = 'profile'; // Если профиль есть, начинаем с профиля
             } catch (e) {
                 console.error('Ошибка при загрузке профиля:', e);
                 localStorage.removeItem('datingProfile');
+                this.state.currentScreen = 'main'; // Если ошибка, начинаем с главного экрана
             }
+        } else {
+            this.state.currentScreen = 'main'; // Если профиля нет, начинаем с главного экрана
         }
     }
 
@@ -160,21 +178,38 @@ class DatingApp {
         this.switchScreen('discovery');
     }
 
+    showMainScreen() {
+        this.switchScreen('main');
+    }
+
     switchScreen(screenName) {
+        // Деактивируем все экраны
         this.elements.mainScreen.classList.remove('active');
         this.elements.registrationForm.classList.remove('active');
         this.elements.profileView.classList.remove('active');
         this.elements.discoveryScreen.classList.remove('active');
 
+        // Деактивируем все кнопки навигации
+        this.elements.navButtons.forEach(button => button.classList.remove('active'));
+
+        // Активируем нужный экран и кнопку навигации
         if (screenName === 'main') {
             this.elements.mainScreen.classList.add('active');
+            document.querySelector('.nav-btn[data-screen="main"]').classList.add('active');
+            this.elements.topNavigation.style.display = 'flex'; // Показываем навигацию
         } else if (screenName === 'registration') {
             this.elements.registrationForm.classList.add('active');
+            this.elements.topNavigation.style.display = 'none'; // Скрываем навигацию во время регистрации
         } else if (screenName === 'profile') {
             this.elements.profileView.classList.add('active');
+            document.querySelector('.nav-btn[data-screen="profile"]').classList.add('active');
+            this.elements.topNavigation.style.display = 'flex';
         } else if (screenName === 'discovery') {
             this.elements.discoveryScreen.classList.add('active');
+            document.querySelector('.nav-btn[data-screen="discovery"]').classList.add('active');
+            this.elements.topNavigation.style.display = 'flex';
         }
+        this.state.currentScreen = screenName; // Обновляем текущий активный экран
     }
 
     calculateDistance(lat1, lon1, lat2, lon2) {

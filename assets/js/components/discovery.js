@@ -36,11 +36,11 @@ class DiscoveryHandler {
     }
 
     // Метод для генерации случайных профилей (для демонстрации)
-    generateRandomProfiles(count = 20) { // Увеличим количество для лучшей демонстрации фильтрации
+    generateRandomProfiles(count = 20) {
         const profiles = [];
-        const namesMale = ['Иван', 'Дмитрий', 'Алексей', 'Сергей', 'Максим', 'Андрей'];
-        const namesFemale = ['Анна', 'Мария', 'Елена', 'Ольга', 'Наталья', 'Екатерина'];
-        const cities = ['Москва', 'Санкт-Петербург', 'Казань', 'Сочи', 'Новосибирск', 'Екатеринбург', 'Нижний Новгород'];
+        const namesMale = ['Иван', 'Дмитрий', 'Алексей', 'Сергей', 'Максим', 'Андрей', 'Николай', 'Артем', 'Егор', 'Павел'];
+        const namesFemale = ['Анна', 'Мария', 'Елена', 'Ольга', 'Наталья', 'Екатерина', 'София', 'Виктория', 'Дарья', 'Анастасия'];
+        const cities = ['Москва', 'Санкт-Петербург', 'Казань', 'Сочи', 'Новосибирск', 'Екатеринбург', 'Нижний Новгород', 'Краснодар', 'Самара', 'Уфа'];
         const descriptions = [
             'Люблю путешествовать и открывать новые места.',
             'Увлекаюсь чтением фантастики и настольными играми.',
@@ -51,7 +51,12 @@ class DiscoveryHandler {
             'Мечтаю о кругосветном путешествии.',
             'Занимаюсь спортом и веду здоровый образ жизни.',
             'Ищу вдохновение в повседневных мелочах.',
-            'Люблю долгие прогулки и интересные беседы.'
+            'Люблю долгие прогулки и интересные беседы.',
+            'Всегда открыт для новых знакомств и приключений.',
+            'Ищу человека, с которым можно разделить радости и печали.',
+            'Моя жизнь - это постоянное движение и развитие.',
+            'Люблю животных и природу.',
+            'Увлекаюсь фотографией и созданием контента.'
         ];
 
         for (let i = 0; i < count; i++) {
@@ -98,29 +103,38 @@ class DiscoveryHandler {
     }
 
     startDiscovery() {
-        const allGeneratedProfiles = this.generateRandomProfiles(20); // Генерируем достаточно профилей
+        const allGeneratedProfiles = this.generateRandomProfiles(30); // Увеличим количество для лучшей демонстрации фильтрации
         const userPreference = this.app.state.userData.preference;
-        const userGender = this.app.state.userData.gender; // Пол текущего пользователя
+        const userGender = this.app.state.userData.gender;
 
-        // Фильтруем профили на основе предпочтений пользователя
         this.app.state.suggestedProfiles = allGeneratedProfiles.filter(profile => {
-            if (userPreference === 'both') {
-                return true; // Если ищем всех, то все подходят
-            } else if (userPreference === 'male') {
-                return profile.gender === 'male'; // Если ищем мужчин, показываем только мужчин
-            } else if (userPreference === 'female') {
-                return profile.gender === 'female'; // Если ищем женщин, показываем только женщин
+            // Исключаем свой пол, если пользователь ищет противоположный
+            if (userPreference === 'male' && profile.gender !== 'male') return false;
+            if (userPreference === 'female' && profile.gender !== 'female') return false;
+            
+            // Если пользователь ищет "всех", то показываем всех, кроме себя
+            if (userPreference === 'both' && profile.gender === userGender) {
+                // Если пользователь ищет "всех", но его пол совпадает с полом профиля,
+                // то мы все равно показываем этот профиль, так как "всех" включает и свой пол.
+                // Если бы мы хотели исключить свой пол при "both", логика была бы другой.
+                // Текущая логика: "both" = male + female.
+                // Если пользователь male и ищет both, ему покажут male и female.
+                // Если пользователь female и ищет both, ему покажут male и female.
+                return true;
             }
+            
+            // Если пользователь ищет конкретный пол, и этот пол совпадает с полом профиля
+            if ((userPreference === 'male' && profile.gender === 'male') || 
+                (userPreference === 'female' && profile.gender === 'female')) {
+                return true;
+            }
+
             return false;
         });
 
-        // Дополнительная фильтрация: не показывать профили того же пола, если пользователь не ищет "всех"
-        // и если его предпочтение не совпадает с его собственным полом (т.е. если он ищет противоположный пол)
-        if (userPreference !== 'both') {
-            this.app.state.suggestedProfiles = this.app.state.suggestedProfiles.filter(profile => {
-                return profile.gender !== userGender;
-            });
-        }
+        // Дополнительная фильтрация: убедиться, что не показываем профиль текущего пользователя (если бы он был в списке)
+        // В данном случае, генерируемые профили не включают текущего пользователя, но это хорошая практика.
+        this.app.state.suggestedProfiles = this.app.state.suggestedProfiles.filter(profile => profile.id !== this.app.state.userData.id);
 
 
         this.app.state.likedProfiles = [];
@@ -145,8 +159,7 @@ class DiscoveryHandler {
 
     renderProfile(profile) {
         // Применяем цвет профиля к карточке подборки
-        document.documentElement.style.setProperty('--primary', profile.profileColor);
-        document.documentElement.style.setProperty('--primary-dark', this.app.profileHandler.darkenColor(profile.profileColor, 20));
+        this.app.profileHandler.applyProfileColor(profile.profileColor); // Используем метод из ProfileHandler
 
         this.elements.name.textContent = profile.name;
         if (profile.gender) {

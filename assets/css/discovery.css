@@ -5,45 +5,45 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 20px;
+    padding: 20px; /* Общий паддинг для экрана */
 }
 
 .discovery-card {
-    background: rgba(255, 255, 255, 0.98);
+    background: var(--surface); /* Чисто белый фон */
     border-radius: var(--radius-lg);
     padding: 30px;
     width: 100%;
     max-width: 400px;
-    box-shadow: var(--shadow-lg); /* Более выраженная тень */
+    box-shadow: var(--shadow-lg);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 20px;
+    gap: 24px; /* Увеличен зазор */
     transition: all var(--transition-normal) ease;
-    /* border: 4px solid var(--primary); */ /* Убираем обводку */
+    border: 1px solid var(--border); /* Легкая обводка */
 }
 
 .discovery-avatar {
-    width: 150px;
-    height: 150px;
-    border-radius: var(--radius-md);
+    width: 160px; /* Увеличен размер */
+    height: 160px;
+    border-radius: var(--radius-lg); /* Более скругленные углы */
     background-color: var(--surface);
     background-size: cover;
     background-position: center;
-    /* border: 4px solid var(--primary); */ /* Убираем обводку */
-    box-shadow: var(--shadow-md); /* Добавляем тень */
+    box-shadow: var(--shadow-md);
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    border: 2px solid var(--border); /* Легкая обводка */
 }
 
 .discovery-avatar .avatar-placeholder {
-    font-size: 3.5rem;
+    font-size: 4rem; /* Увеличен размер */
     color: var(--primary);
-    opacity: 0.6;
+    opacity: 0.5;
 }
 
 .discovery-info {
@@ -51,10 +51,11 @@
 }
 
 .discovery-name {
-    font-size: 2rem;
+    font-size: 2.4rem; /* Увеличен размер */
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    line-height: 1.2;
 }
 
 .discovery-meta {
@@ -63,24 +64,25 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 6px;
 }
 
 .discovery-meta span:not(:last-child)::after {
-    content: ' •'; /* Изменяем разделитель на точку */
-    margin-left: 5px;
+    content: ' •';
+    margin-left: 6px;
 }
 
 .discovery-description {
-    background: var(--surface); /* Используем переменную */
-    padding: 16px;
+    background: var(--surface);
+    padding: 18px; /* Увеличен паддинг */
     border-radius: var(--radius-md);
-    font-size: 0.95rem;
-    line-height: 1.6;
+    font-size: 1rem;
+    line-height: 1.7;
     color: var(--text-primary);
     width: 100%;
     text-align: left;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); /* Внутренняя тень */
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.05);
+    border: 1px solid var(--border); /* Легкая обводка */
 }
 
 .discovery-section {
@@ -89,11 +91,11 @@
 }
 
 .discovery-section .section-title {
-    font-size: 1.1rem;
+    font-size: 1.4rem; /* Увеличен размер */
     color: var(--primary);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     font-weight: 800;
-    text-align: left; /* Выравнивание заголовков секций */
+    text-align: left;
 }
 
 /* Используем существующие стили для looking-for-container и interests-container */
@@ -104,7 +106,7 @@
 
 .discovery-actions {
     display: flex;
-    gap: 20px;
+    gap: 25px; /* Увеличен зазор */
     margin-top: 30px;
     width: 100%;
     justify-content: center;
@@ -112,10 +114,10 @@
 
 .discovery-actions .btn {
     min-width: unset;
-    width: 60px; /* Фиксированный размер для круглых кнопок */
-    height: 60px; /* Фиксированный размер для круглых кнопок */
-    padding: 0; /* Убираем паддинг, чтобы SVG был по центру */
-    font-size: 1.2rem;
+    width: 70px; /* Увеличенный размер для круглых кнопок */
+    height: 70px;
+    padding: 0;
+    font-size: 1.4rem; /* Увеличен размер шрифта */
     border-radius: 50%;
     box-shadow: var(--shadow-md);
     display: flex;
@@ -128,7 +130,7 @@
 }
 
 .discovery-actions .btn-pass:hover {
-    background-color: #555;
+    background-color: #6C7A89; /* Чуть темнее серый */
 }
 
 .discovery-actions .btn-like {
@@ -140,61 +142,69 @@
 }
 
 .discovery-actions .btn svg {
-    width: 28px; /* Увеличиваем размер иконок */
-    height: 28px;
+    width: 32px; /* Увеличиваем размер иконок */
+    height: 32px;
+    stroke: white; /* Цвет иконок */
 }
 
 .no-profiles-message {
-    font-size: 1.2rem;
+    font-size: 1.3rem; /* Увеличен размер */
     color: var(--text-secondary);
     text-align: center;
-    padding: 30px;
+    padding: 40px; /* Увеличен паддинг */
     background-color: var(--surface);
     border-radius: var(--radius-md);
     margin-top: 50px;
-    box-shadow: var(--shadow-md); /* Добавляем тень */
+    box-shadow: var(--shadow-md);
     display: none;
+    border: 1px solid var(--border);
 }
 
 /* Адаптация для мобильных */
 @media (max-width: 480px) {
     .discovery-card {
-        padding: 20px;
+        padding: 25px;
         max-width: 100%;
+        gap: 20px;
     }
 
     .discovery-avatar {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
     }
 
     .discovery-name {
-        font-size: 1.6rem;
+        font-size: 1.8rem;
     }
 
     .discovery-meta {
-        font-size: 0.95rem;
-    }
-
-    .discovery-description {
-        padding: 12px;
-        font-size: 0.9rem;
-    }
-
-    .discovery-section .section-title {
         font-size: 1rem;
     }
 
+    .discovery-description {
+        padding: 14px;
+        font-size: 0.95rem;
+    }
+
+    .discovery-section .section-title {
+        font-size: 1.2rem;
+    }
+
     .discovery-actions {
-        gap: 15px;
+        gap: 20px;
     }
 
     .discovery-actions .btn {
-        width: 50px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
     }
     .discovery-actions .btn svg {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
+    }
+
+    .no-profiles-message {
+        padding: 30px;
+        font-size: 1.1rem;
     }
 }

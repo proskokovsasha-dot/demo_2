@@ -20,12 +20,13 @@ class ProfileHandler {
             profileAvatar: document.getElementById('profileAvatar'),
             editBtn: document.getElementById('editBtn'),
             newProfileBtn: document.getElementById('newProfileBtn')
+            // startDiscoveryBtn удален, так как он теперь в навигации
         };
     }
 
     showProfile() {
         const { userData } = this.app.state;
-        const profileColor = userData.profileColor || '#D7303B';
+        const profileColor = userData.profileColor || '#FF6B6B'; // Обновленный цвет по умолчанию
         
         this.applyProfileColor(profileColor);
         this.updateAvatar(userData.avatar);
@@ -38,15 +39,13 @@ class ProfileHandler {
 
     applyProfileColor(color) {
         document.documentElement.style.setProperty('--primary', color);
+        // Для корректного расчета primary-dark, нужно получить RGB компоненты
+        const rgb = this.hexToRgb(color);
+        if (rgb) {
+            document.documentElement.style.setProperty('--primary-rgb', `${rgb.r},${rgb.g},${rgb.b}`);
+        }
         document.documentElement.style.setProperty('--primary-dark', this.darkenColor(color, 20));
-        
-        // Убираем явные обводки, оставляем только тени
-        if (this.elements.profileCard) {
-            // this.elements.profileCard.style.borderColor = color; // Убрано
-        }
-        if (this.elements.profileAvatar) {
-            // this.elements.profileAvatar.style.borderColor = color; // Убрано
-        }
+        document.documentElement.style.setProperty('--primary-light', this.lightenColor(color, 40)); // Добавлено осветление
     }
 
     darkenColor(color, percent) {
@@ -56,6 +55,28 @@ class ProfileHandler {
         const G = Math.max(0, (num >> 8 & 0x00FF) - amt);
         const B = Math.max(0, (num & 0x0000FF) - amt);
         return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+    }
+
+    lightenColor(color, percent) {
+        const num = parseInt(color.replace('#', ''), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = Math.min(255, (num >> 16) + amt);
+        const G = Math.min(255, (num >> 8 & 0x00FF) + amt);
+        const B = Math.min(255, (num & 0x0000FF) + amt);
+        return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+    }
+
+    hexToRgb(hex) {
+        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
     }
 
     updateProfileInfo(userData) {
@@ -85,6 +106,8 @@ class ProfileHandler {
             if (distance) {
                 this.elements.profileDistance.textContent = `, ~${distance} км от вас`;
             }
+        } else {
+            this.elements.profileDistance.textContent = ''; // Очищаем, если нет данных
         }
         
         this.elements.profileDescription.textContent = userData.description || 'Пользователь пока ничего о себе не рассказал';
@@ -180,12 +203,13 @@ class ProfileHandler {
     }
 
     bindEvents() {
+        // Проверяем, был ли уже добавлен слушатель, чтобы избежать дублирования
         if (!this.elements.editBtn.dataset.listenerAdded) {
             this.elements.editBtn.addEventListener('click', () => {
                 this.app.switchScreen('registration');
                 this.app.formHandler.renderForm();
             });
-            this.elements.editBtn.dataset.listenerAdded = true;
+            this.elements.editBtn.dataset.listenerAdded = true; // Помечаем, что слушатель добавлен
         }
 
         if (!this.elements.newProfileBtn.dataset.listenerAdded) {
@@ -194,7 +218,7 @@ class ProfileHandler {
                     this.resetProfile();
                 }
             });
-            this.elements.newProfileBtn.dataset.listenerAdded = true;
+            this.elements.newProfileBtn.dataset.listenerAdded = true; // Помечаем, что слушатель добавлен
         }
     }
 
@@ -208,8 +232,8 @@ class ProfileHandler {
             description: '',
             interests: [],
             lookingFor: [],
-            preference: 'both', // Сброс предпочтений
-            profileColor: '#D7303B',
+            preference: 'both',
+            profileColor: '#FF6B6B', // Сброс на новый дефолтный цвет
             avatar: null,
             photos: [],
             location: { lat: null, lng: null }
