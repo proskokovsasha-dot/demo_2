@@ -15,7 +15,7 @@ class ProfileHandler {
             profileDistance: document.getElementById('profileDistance'),
             profileDescription: document.getElementById('profileDescription'),
             profileLookingFor: document.getElementById('profileLookingFor'),
-            profileInterests: document.getElementById('profileInterests'), // Убедимся, что этот элемент существует
+            profileInterests: document.getElementById('profileInterests'),
             profilePhotos: document.getElementById('profilePhotos'),
             profileAvatar: document.getElementById('profileAvatar'),
             editBtn: document.getElementById('editBtn'),
@@ -31,7 +31,7 @@ class ProfileHandler {
         this.updateAvatar(userData.avatar);
         this.updateProfileInfo(userData);
         this.updateLookingFor(userData.lookingFor, this.app.config.lookingForOptions);
-        this.updateInterests(userData.interests, this.app.config.interests); // Вызов метода для интересов
+        this.updateInterests(userData.interests, this.app.config.interests);
         this.updatePhotos(userData.photos);
         this.bindEvents();
     }
@@ -40,11 +40,12 @@ class ProfileHandler {
         document.documentElement.style.setProperty('--primary', color);
         document.documentElement.style.setProperty('--primary-dark', this.darkenColor(color, 20));
         
+        // Убираем явные обводки, оставляем только тени
         if (this.elements.profileCard) {
-            this.elements.profileCard.style.borderColor = color;
+            // this.elements.profileCard.style.borderColor = color; // Убрано
         }
         if (this.elements.profileAvatar) {
-            this.elements.profileAvatar.style.borderColor = color;
+            // this.elements.profileAvatar.style.borderColor = color; // Убрано
         }
     }
 
@@ -118,7 +119,6 @@ class ProfileHandler {
         }
     }
 
-    // Новый метод для отображения интересов
     updateInterests(userInterests, configInterests) {
         const container = this.elements.profileInterests;
         if (!container) return;
@@ -208,6 +208,7 @@ class ProfileHandler {
             description: '',
             interests: [],
             lookingFor: [],
+            preference: 'both', // Сброс предпочтений
             profileColor: '#D7303B',
             avatar: null,
             photos: [],

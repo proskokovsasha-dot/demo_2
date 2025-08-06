@@ -6,7 +6,7 @@
     --text-secondary: #636E72;
     --background: #FFFFFF;
     --surface: #F5F6FA;
-    --border: #DFE6E9;
+    --border: #DFE6E9; /* Используется для некоторых элементов, но не для input */
     --error: #F44336;
     --success: #4CAF50;
     --warning: #FFC107;
@@ -16,6 +16,7 @@
     --radius-lg: 16px;
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
     --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.15); /* Новый, более выраженный тень */
     --transition-fast: 0.15s;
     --transition-normal: 0.3s;
 }
@@ -45,7 +46,6 @@ body {
     margin: 0 auto;
 }
 
-/* Добавьте это свойство к .loading-screen */
 .loading-screen {
     transition: opacity 0.5s ease-out; 
 }

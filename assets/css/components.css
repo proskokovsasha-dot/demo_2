@@ -13,6 +13,7 @@
     --radius-lg: 16px;
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
     --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
     --transition-fast: 0.15s;
     --transition-normal: 0.3s;
 }
@@ -76,10 +77,12 @@
 .btn-secondary {
     background-color: var(--surface);
     color: var(--text-primary);
+    box-shadow: none; /* Убираем тень для вторичных кнопок */
 }
 
 .btn-secondary:hover {
     background-color: #e0e0e0;
+    box-shadow: var(--shadow-sm); /* Добавляем легкую тень при наведении */
 }
 
 /* Формы */
@@ -102,23 +105,25 @@
     width: 100%;
     padding: 16px;
     margin: 12px 0;
-    border: 2px solid var(--border);
+    border: none; /* Убираем обводку */
     border-radius: var(--radius-md);
     font-size: 1rem;
     transition: all var(--transition-normal) ease;
+    background-color: var(--surface); /* Мягкий фон */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); /* Внутренняя тень для глубины */
 }
 
 .input-field:focus {
-    border-color: var(--primary);
+    background-color: white; /* Белый фон при фокусе */
+    box-shadow: 0 0 0 3px rgba(215, 48, 59, 0.1), inset 0 1px 3px rgba(0,0,0,0.06); /* Легкая обводка и тень */
     outline: none;
-    box-shadow: 0 0 0 3px rgba(215, 48, 59, 0.1);
 }
 
 .input-field::placeholder {
     color: #B2BEC3;
 }
 
-/* Теги интересов */
+/* Теги выбора (пол, ищу, интересы) */
 .tags-container {
     display: flex;
     flex-wrap: wrap;
@@ -129,21 +134,27 @@
 
 .tag {
     background: var(--surface);
-    padding: 10px 16px;
+    padding: 12px 20px; /* Увеличиваем паддинг */
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--transition-normal) ease;
     font-size: 0.95rem;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px; /* Увеличиваем отступ между текстом и эмодзи */
+    box-shadow: var(--shadow-sm); /* Добавляем тень */
+}
+
+.tag:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .tag.selected {
     background: var(--primary);
     color: white;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
 }
 
 /* Палитра цветов */
@@ -163,11 +174,13 @@
     transition: all 0.2s;
     position: relative;
     border: 2px solid transparent;
+    box-shadow: var(--shadow-sm); /* Добавляем тень */
 }
 
 .color-option.selected {
     border-color: var(--text-primary);
     transform: scale(1.1);
+    box-shadow: var(--shadow-md); /* Увеличиваем тень при выборе */
 }
 
 .color-option.selected::after {
@@ -195,6 +208,13 @@
     border-radius: 50%;
     cursor: pointer;
     padding: 0;
+    box-shadow: var(--shadow-sm); /* Добавляем тень */
+    transition: all var(--transition-normal) ease;
+}
+
+.color-custom input[type="color"]:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
 }
 
 .color-custom label {
@@ -219,7 +239,8 @@
     background-color: var(--surface);
     background-size: cover;
     background-position: center;
-    border: 4px solid var(--primary);
+    /* border: 4px solid var(--primary); */ /* Убираем явную обводку */
+    box-shadow: var(--shadow-sm); /* Добавляем тень */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -250,11 +271,12 @@
     width: 100%;
     max-width: 500px;
     margin: 20px auto;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg); /* Более выраженная тень */
     transition: all var(--transition-normal) ease;
     display: flex;
     flex-direction: column;
     gap: 24px;
+    /* border: none; */ /* Убираем обводку */
 }
 
 .profile-header {
@@ -271,7 +293,8 @@
     height: 120px;
     border-radius: var(--radius-md);
     background-color: var(--surface);
-    /* border: 4px solid var(--primary); */
+    /* border: 4px solid var(--primary); */ /* Убираем обводку */
+    box-shadow: var(--shadow-md); /* Добавляем тень */
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -297,6 +320,13 @@
     font-size: 1rem;
     display: flex;
     justify-content: center;
+    flex-wrap: wrap; /* Для переноса строк на маленьких экранах */
+    gap: 5px;
+}
+
+.profile-meta span:not(:last-child)::after {
+    content: ' •'; /* Изменяем разделитель на точку */
+    margin-left: 5px;
 }
 
 .profile-section {
@@ -310,15 +340,18 @@
     color: var(--primary);
     margin-bottom: 12px;
     font-weight: 800;
+    text-align: left; /* Выравнивание заголовков секций */
 }
 
 .profile-description {
-    background: rgba(245, 246, 250, 0.8);
+    background: var(--surface); /* Используем переменную */
     padding: 16px;
     border-radius: var(--radius-md);
     font-size: 0.95rem;
     line-height: 1.6;
     color: var(--text-primary);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); /* Внутренняя тень */
+    text-align: left;
 }
 
 .profile-interests {
@@ -386,14 +419,16 @@
     border-radius: var(--radius-md);
     position: relative;
     transition: all var(--transition-normal) ease;
+    box-shadow: var(--shadow-sm); /* Добавляем тень */
 }
 
 .photo-preview:hover {
     transform: scale(1.03);
+    box-shadow: var(--shadow-md);
 }
 
 .photo-preview.main-avatar {
-    border: 3px solid var(--primary);
+    border: 3px solid var(--primary); /* Оставляем обводку для главной аватарки */
 }
 
 .set-avatar-btn {
@@ -512,11 +547,12 @@
     background-color: color-mix(in srgb, var(--primary) 10%, white);
     border-radius: var(--radius-md);
     transition: all var(--transition-fast) ease;
+    box-shadow: var(--shadow-sm); /* Добавляем тень */
 }
 
 .looking-for-item:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
 }
 
 .looking-for-emoji {
@@ -544,11 +580,12 @@
     background-color: color-mix(in srgb, var(--primary) 8%, white);
     border-radius: var(--radius-md);
     transition: all var(--transition-fast) ease;
+    box-shadow: var(--shadow-sm); /* Добавляем тень */
 }
 
 .interest-item:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
 }
 
 .interest-emoji {
@@ -570,6 +607,7 @@
     text-align: center;
     background-color: var(--surface);
     border-radius: var(--radius-md);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); /* Внутренняя тень */
 }
 
 /* Адаптация для мобильных */

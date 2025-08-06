@@ -53,8 +53,9 @@ class FormHandler {
             4: this.getZodiacStep(),
             5: this.getCityStep(),
             6: this.getLookingForStep(),
-            7: this.getInterestsStep(), // Добавлен новый шаг для интересов
-            8: this.getColorAndPhotosStep() // Сдвинут на один шаг вперед
+            7: this.getInterestsStep(),
+            8: this.getPreferenceStep(), // Новый шаг для предпочтений
+            9: this.getColorAndPhotosStep() // Сдвинут на один шаг вперед
         };
         return stepContents[step] || '';
     }
@@ -142,7 +143,6 @@ class FormHandler {
         `;
     }
 
-    // Новый шаг: Выбор интересов
     getInterestsStep() {
         return `
             <h2 class="section-title">Ваши интересы</h2>
@@ -152,6 +152,22 @@ class FormHandler {
                     <div class="tag ${this.app.state.userData.interests.includes(interest.id) ? 'selected' : ''}" 
                          data-interest="${interest.id}">
                         ${interest.emoji} ${interest.name}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // Новый шаг: Кого вы ищете?
+    getPreferenceStep() {
+        return `
+            <h2 class="section-title">Кого вы ищете?</h2>
+            <p class="section-description">Выберите, кого вы хотите видеть в подборке</p>
+            <div class="tags-container">
+                ${this.app.config.preferenceOptions.map(option => `
+                    <div class="tag ${this.app.state.userData.preference === option.id ? 'selected' : ''}" 
+                         data-preference="${option.id}">
+                        ${option.emoji} ${option.name}
                     </div>
                 `).join('')}
             </div>
@@ -214,7 +230,8 @@ class FormHandler {
         this.setupZodiacHandler();
         this.setupLocationHandlers();
         this.setupLookingForHandlers();
-        this.setupInterestsHandlers(); // Добавлен обработчик для интересов
+        this.setupInterestsHandlers();
+        this.setupPreferenceHandlers(); // Новый обработчик
         this.setupColorHandlers();
         this.setupPhotoHandlers();
         this.setupEnterKeyHandler();
@@ -303,7 +320,6 @@ class FormHandler {
         });
     }
 
-    // Новый обработчик для интересов
     setupInterestsHandlers() {
         document.querySelectorAll('[data-interest]').forEach(tag => {
             tag.addEventListener('click', (e) => {
@@ -321,6 +337,17 @@ class FormHandler {
                         alert(`Вы можете выбрать не более ${this.app.config.maxInterests} интересов.`);
                     }
                 }
+            });
+        });
+    }
+
+    // Новый обработчик для предпочтений по полу
+    setupPreferenceHandlers() {
+        document.querySelectorAll('[data-preference]').forEach(tag => {
+            tag.addEventListener('click', (e) => {
+                document.querySelectorAll('[data-preference]').forEach(t => t.classList.remove('selected'));
+                e.currentTarget.classList.add('selected');
+                this.app.state.userData.preference = e.currentTarget.dataset.preference;
             });
         });
     }
@@ -517,9 +544,15 @@ class FormHandler {
                     return false;
                 }
                 return true;
-            case 7: // Валидация для нового шага интересов
+            case 7:
                 if (this.app.state.userData.interests.length === 0) {
                     alert('Выберите хотя бы один интерес');
+                    return false;
+                }
+                return true;
+            case 8: // Валидация для нового шага предпочтений
+                if (!this.app.state.userData.preference) {
+                    alert('Выберите, кого вы ищете');
                     return false;
                 }
                 return true;
@@ -542,7 +575,7 @@ class FormHandler {
             case 5:
                 this.app.state.userData.city = document.getElementById('userCity').value.trim();
                 break;
-            case 8: // Обновлен номер шага для описания
+            case 9: // Обновлен номер шага для описания
                 this.app.state.userData.description = document.getElementById('userDescription').value.trim();
                 break;
         }

@@ -2,11 +2,11 @@ class DatingApp {
     constructor() {
         this.config = {
             colors: ['#10367D', '#2D4D9E', '#4A64BF', '#677BDF', '#FF6B6B', '#FF8E8E', '#4ECDC4', '#7EDFD8', '#A05195', '#C27BB3', '#FDCB6E', '#FFEAA7'],
-            maxInterests: 5, // Добавлено: Максимальное количество интересов
+            maxInterests: 5,
             minAge: 18,
             maxAge: 100,
             maxPhotos: 6,
-            interests: [ // Добавлено: Список доступных интересов
+            interests: [
                 { id: 'music', name: 'Музыка', emoji: '🎵' },
                 { id: 'sports', name: 'Спорт', emoji: '⚽' },
                 { id: 'books', name: 'Книги', emoji: '📚' },
@@ -40,12 +40,18 @@ class DatingApp {
                 { id: 'serious', name: 'Серьёзные отношения', emoji: '💍' },
                 { id: 'networking', name: 'Нетворкинг', emoji: '👔' },
                 { id: 'travel', name: 'Спутник для путешествий', emoji: '✈️' }
+            ],
+            // Новые опции для предпочтений по полу
+            preferenceOptions: [
+                { id: 'male', name: 'Мужчин', emoji: '👨' },
+                { id: 'female', name: 'Женщин', emoji: '👩' },
+                { id: 'both', name: 'Всех', emoji: '🚻' }
             ]
         };
 
         this.state = {
             currentStep: 1,
-            totalSteps: 8, // Изменено: Увеличено количество шагов до 8
+            totalSteps: 9, // Увеличено на 1 для нового шага предпочтений
             userData: {
                 name: '',
                 gender: '',
@@ -53,19 +59,24 @@ class DatingApp {
                 zodiacSign: '',
                 city: '',
                 description: '',
-                interests: [], // Инициализируем массив интересов
+                interests: [],
                 lookingFor: [],
+                preference: 'both', // Добавлено предпочтение по полу по умолчанию
                 profileColor: '#D7303B',
                 avatar: null,
                 photos: [],
                 location: { lat: null, lng: null }
-            }
+            },
+            suggestedProfiles: [],
+            likedProfiles: [],
+            passedProfiles: []
         };
 
         this.initElements();
         this.formHandler = new FormHandler(this);
         this.profileHandler = new ProfileHandler(this);
         this.uiHandler = new UIHandler(this);
+        this.discoveryHandler = new DiscoveryHandler(this);
 
         this.bindEvents();
         this.checkSavedProfile();
@@ -73,27 +84,20 @@ class DatingApp {
     }
 
     showLoadingScreen() {
-        // 1. Инициализируем анимацию логотипа сразу
         this.uiHandler.initLogoAnimation(); 
 
-        // 2. Через некоторое время (достаточное для проигрывания анимации)
-        //    плавно скрываем экран загрузки и показываем основное приложение.
-        //    Анимация логотипа длится 1.5 секунды, поэтому 1.5 секунды - это хороший таймаут.
         setTimeout(() => {
             const loadingScreen = document.getElementById('loadingScreen');
             const appContainer = document.getElementById('appContainer');
 
-            // Устанавливаем opacity в 0 для плавного исчезновения
             loadingScreen.style.opacity = '0'; 
 
-            // Ждем завершения CSS-перехода opacity, затем скрываем элемент
             loadingScreen.addEventListener('transitionend', function handler() {
                 loadingScreen.style.display = 'none';
                 appContainer.style.display = 'block';
-                // Удаляем слушатель, чтобы он не срабатывал повторно
                 loadingScreen.removeEventListener('transitionend', handler); 
-            }, { once: true }); // { once: true } также удаляет слушатель после первого срабатывания
-        }, 1500); // 1.5 секунды, чтобы анимация логотипа успела проиграться
+            }, { once: true });
+        }, 1500);
     }
 
     initElements() {
@@ -101,12 +105,21 @@ class DatingApp {
             mainScreen: document.getElementById('mainScreen'),
             registrationForm: document.getElementById('registrationForm'),
             profileView: document.getElementById('profileView'),
-            startBtn: document.getElementById('startBtn')
+            discoveryScreen: document.getElementById('discoveryScreen'),
+            startBtn: document.getElementById('startBtn'),
+            startDiscoveryBtn: document.getElementById('startDiscoveryBtn'),
+            backToProfileFromDiscoveryBtn: document.getElementById('backToProfileFromDiscoveryBtn')
         };
     }
 
     bindEvents() {
         this.elements.startBtn.addEventListener('click', () => this.startRegistration());
+        if (this.elements.startDiscoveryBtn) {
+            this.elements.startDiscoveryBtn.addEventListener('click', () => this.startDiscovery());
+        }
+        if (this.elements.backToProfileFromDiscoveryBtn) {
+            this.elements.backToProfileFromDiscoveryBtn.addEventListener('click', () => this.showProfile());
+        }
     }
 
     checkSavedProfile() {
@@ -114,9 +127,15 @@ class DatingApp {
         if (savedProfile) {
             try {
                 this.state.userData = JSON.parse(savedProfile);
-                // Убедимся, что interests инициализирован как массив
+                // Убедимся, что все новые поля инициализированы
                 if (!Array.isArray(this.state.userData.interests)) {
                     this.state.userData.interests = [];
+                }
+                if (!Array.isArray(this.state.userData.lookingFor)) {
+                    this.state.userData.lookingFor = [];
+                }
+                if (!this.state.userData.preference) { // Инициализация нового поля
+                    this.state.userData.preference = 'both';
                 }
                 this.showProfile();
             } catch (e) {
@@ -136,10 +155,16 @@ class DatingApp {
         this.switchScreen('profile');
     }
 
+    startDiscovery() {
+        this.discoveryHandler.startDiscovery();
+        this.switchScreen('discovery');
+    }
+
     switchScreen(screenName) {
         this.elements.mainScreen.classList.remove('active');
         this.elements.registrationForm.classList.remove('active');
         this.elements.profileView.classList.remove('active');
+        this.elements.discoveryScreen.classList.remove('active');
 
         if (screenName === 'main') {
             this.elements.mainScreen.classList.add('active');
@@ -147,6 +172,8 @@ class DatingApp {
             this.elements.registrationForm.classList.add('active');
         } else if (screenName === 'profile') {
             this.elements.profileView.classList.add('active');
+        } else if (screenName === 'discovery') {
+            this.elements.discoveryScreen.classList.add('active');
         }
     }
 
