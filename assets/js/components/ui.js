@@ -8,7 +8,6 @@ class UIHandler {
         logoPaths.forEach(path => {
             path.style.strokeDasharray = '150';
             path.style.strokeDashoffset = '150';
-            // Убедимся, что анимация запускается только один раз при загрузке
             if (!path.dataset.animated) {
                 setTimeout(() => {
                     path.style.animation = 'drawLogo 1.5s ease-out forwards';

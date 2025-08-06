@@ -27,15 +27,10 @@ class DiscoveryHandler {
     }
 
     setupEventListeners() {
-        if (this.elements.likeBtn) {
-            this.elements.likeBtn.addEventListener('click', () => this.handleLike());
-        }
-        if (this.elements.passBtn) {
-            this.elements.passBtn.addEventListener('click', () => this.handlePass());
-        }
+        this.elements.likeBtn.addEventListener('click', () => this.handleLike());
+        this.elements.passBtn.addEventListener('click', () => this.handlePass());
     }
 
-    // Метод для генерации случайных профилей (для демонстрации)
     generateRandomProfiles(count = 20) {
         const profiles = [];
         const namesMale = ['Иван', 'Дмитрий', 'Алексей', 'Сергей', 'Максим', 'Андрей', 'Николай', 'Артем', 'Егор', 'Павел'];
@@ -71,14 +66,14 @@ class DiscoveryHandler {
             const randomColor = this.app.config.colors[Math.floor(Math.random() * this.app.config.colors.length)];
 
             const randomLookingFor = [];
-            const numLookingFor = Math.floor(Math.random() * 3) + 1; // 1-3 options
+            const numLookingFor = Math.floor(Math.random() * 3) + 1;
             const shuffledLookingFor = [...this.app.config.lookingForOptions].sort(() => 0.5 - Math.random());
             for (let j = 0; j < numLookingFor; j++) {
                 randomLookingFor.push(shuffledLookingFor[j].id);
             }
 
             const randomInterests = [];
-            const numInterests = Math.floor(Math.random() * this.app.config.maxInterests) + 1; // 1-maxInterests
+            const numInterests = Math.floor(Math.random() * this.app.config.maxInterests) + 1;
             const shuffledInterests = [...this.app.config.interests].sort(() => 0.5 - Math.random());
             for (let j = 0; j < numInterests; j++) {
                 randomInterests.push(shuffledInterests[j].id);
@@ -92,50 +87,29 @@ class DiscoveryHandler {
                 city: randomCity,
                 description: randomDescription,
                 profileColor: randomColor,
-                avatar: `https://picsum.photos/seed/${randomName}${randomAge}${randomGender}/120/120`, // Random avatar image
+                avatar: `https://picsum.photos/seed/${randomName}${randomAge}${randomGender}/120/120`,
                 photos: Array.from({ length: Math.floor(Math.random() * 4) + 1 }, (_, k) => `https://picsum.photos/seed/${randomName}${randomAge}${randomGender}${k}/100/100`),
                 lookingFor: randomLookingFor,
                 interests: randomInterests,
-                location: { lat: 55.7558 + (Math.random() - 0.5) * 0.1, lng: 37.6173 + (Math.random() - 0.5) * 0.1 } // Moscow area
+                location: { lat: 55.7558 + (Math.random() - 0.5) * 0.1, lng: 37.6173 + (Math.random() - 0.5) * 0.1 }
             });
         }
         return profiles;
     }
 
     startDiscovery() {
-        const allGeneratedProfiles = this.generateRandomProfiles(30); // Увеличим количество для лучшей демонстрации фильтрации
+        const allGeneratedProfiles = this.generateRandomProfiles(30);
         const userPreference = this.app.state.userData.preference;
         const userGender = this.app.state.userData.gender;
 
         this.app.state.suggestedProfiles = allGeneratedProfiles.filter(profile => {
-            // Исключаем свой пол, если пользователь ищет противоположный
             if (userPreference === 'male' && profile.gender !== 'male') return false;
             if (userPreference === 'female' && profile.gender !== 'female') return false;
-            
-            // Если пользователь ищет "всех", то показываем всех, кроме себя
-            if (userPreference === 'both' && profile.gender === userGender) {
-                // Если пользователь ищет "всех", но его пол совпадает с полом профиля,
-                // то мы все равно показываем этот профиль, так как "всех" включает и свой пол.
-                // Если бы мы хотели исключить свой пол при "both", логика была бы другой.
-                // Текущая логика: "both" = male + female.
-                // Если пользователь male и ищет both, ему покажут male и female.
-                // Если пользователь female и ищет both, ему покажут male и female.
-                return true;
-            }
-            
-            // Если пользователь ищет конкретный пол, и этот пол совпадает с полом профиля
-            if ((userPreference === 'male' && profile.gender === 'male') || 
-                (userPreference === 'female' && profile.gender === 'female')) {
-                return true;
-            }
-
+            if (userPreference === 'both') return true;
             return false;
         });
 
-        // Дополнительная фильтрация: убедиться, что не показываем профиль текущего пользователя (если бы он был в списке)
-        // В данном случае, генерируемые профили не включают текущего пользователя, но это хорошая практика.
         this.app.state.suggestedProfiles = this.app.state.suggestedProfiles.filter(profile => profile.id !== this.app.state.userData.id);
-
 
         this.app.state.likedProfiles = [];
         this.app.state.passedProfiles = [];
@@ -158,8 +132,7 @@ class DiscoveryHandler {
     }
 
     renderProfile(profile) {
-        // Применяем цвет профиля к карточке подборки
-        this.app.profileHandler.applyProfileColor(profile.profileColor); // Используем метод из ProfileHandler
+        this.app.profileHandler.applyProfileColor(profile.profileColor);
 
         this.elements.name.textContent = profile.name;
         if (profile.gender) {
@@ -178,15 +151,12 @@ class DiscoveryHandler {
             this.elements.avatar.innerHTML = '<span class="avatar-placeholder">👤</span>';
         }
 
-        // Обновляем разделы "Ищу" и "Интересы" для карточки подборки
         this.updateLookingFor(profile.lookingFor, this.app.config.lookingForOptions, this.elements.lookingFor);
         this.updateInterests(profile.interests, this.app.config.interests, this.elements.interests);
 
-        // Сброс анимации
         this.elements.discoveryCard.style.transition = 'none';
         this.elements.discoveryCard.style.transform = 'translateX(0) rotate(0)';
         this.elements.discoveryCard.style.opacity = '1';
-        // Принудительный рефлоу для сброса transition
         void this.elements.discoveryCard.offsetWidth; 
         this.elements.discoveryCard.style.transition = 'all var(--transition-normal) ease';
     }

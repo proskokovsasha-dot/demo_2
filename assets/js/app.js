@@ -1,7 +1,7 @@
 class DatingApp {
     constructor() {
         this.config = {
-            colors: ['#FF6B6B', '#4ECDC4', '#4A64BF', '#FDCB6E', '#A05195', '#2ECC71', '#E74C3C', '#3498DB', '#9B59B6', '#1ABC9C', '#F1C40F', '#E67E22'], // Обновленная палитра
+            colors: ['#FF6B6B', '#4ECDC4', '#4A64BF', '#FDCB6E', '#A05195', '#2ECC71', '#E74C3C', '#3498DB', '#9B59B6', '#1ABC9C', '#F1C40F', '#E67E22'],
             maxInterests: 5,
             minAge: 18,
             maxAge: 100,
@@ -49,7 +49,7 @@ class DatingApp {
         };
 
         this.state = {
-            currentScreen: 'main', // Добавлено для отслеживания активного экрана
+            currentScreen: 'main', // Это будет изменено на 'registration' или 'profile' после проверки localStorage
             currentStep: 1,
             totalSteps: 9,
             userData: {
@@ -62,7 +62,7 @@ class DatingApp {
                 interests: [],
                 lookingFor: [],
                 preference: 'both',
-                profileColor: '#FF6B6B', // Обновленный цвет по умолчанию
+                profileColor: '#FF6B6B',
                 avatar: null,
                 photos: [],
                 location: { lat: null, lng: null }
@@ -79,62 +79,72 @@ class DatingApp {
         this.discoveryHandler = new DiscoveryHandler(this);
 
         this.bindEvents();
-        this.checkSavedProfile();
+        this.checkSavedProfile(); // Определяет начальный экран
         this.showLoadingScreen();
     }
 
     showLoadingScreen() {
-        this.uiHandler.initLogoAnimation(); 
+        this.uiHandler.initLogoAnimation();
+
+        // Анимация текста после логотипа
+        const loadingTextElements = document.querySelectorAll('.loading-text');
+        loadingTextElements.forEach(el => {
+            el.style.opacity = '0'; // Убедимся, что они скрыты перед анимацией
+            el.style.transform = 'translateY(20px) scale(0.95)'; // Начальное состояние для fadeInScale
+        });
+
+        setTimeout(() => {
+            loadingTextElements.forEach(el => {
+                el.style.animationPlayState = 'running'; // Запускаем анимацию текста
+            });
+        }, 1500); // Задержка перед появлением текста (после завершения анимации логотипа)
 
         setTimeout(() => {
             const loadingScreen = document.getElementById('loadingScreen');
             const appContainer = document.getElementById('appContainer');
 
-            loadingScreen.style.opacity = '0'; 
+            loadingScreen.style.opacity = '0';
 
-            loadingScreen.addEventListener('transitionend', function handler() {
+            loadingScreen.addEventListener('transitionend', () => {
                 loadingScreen.style.display = 'none';
-                appContainer.style.display = 'flex'; // Изменено на flex для app-container
-                loadingScreen.removeEventListener('transitionend', handler); 
-                // После загрузки, активируем текущий экран
-                this.switchScreen(this.state.currentScreen);
-            }.bind(this), { once: true }); // Привязываем this
-        }, 1500);
+                appContainer.style.display = 'flex';
+                this.switchScreen(this.state.currentScreen); // Переключаемся на определенный экран
+            }, { once: true });
+        }, 3500); // Общая задержка перед скрытием экрана загрузки (лого + текст)
     }
 
     initElements() {
         this.elements = {
-            mainScreen: document.getElementById('mainScreen'),
+            // mainScreen: document.getElementById('mainScreen'), // Этот элемент не существует в HTML
             registrationForm: document.getElementById('registrationForm'),
             profileView: document.getElementById('profileView'),
             discoveryScreen: document.getElementById('discoveryScreen'),
-            startBtn: document.getElementById('startBtn'),
-            topNavigation: document.getElementById('topNavigation'), // Новый элемент
-            navButtons: document.querySelectorAll('.nav-btn') // Новые элементы
+            settingsScreen: document.getElementById('settingsScreen'),
+            topNavigation: document.getElementById('topNavigation'),
+            navButtons: document.querySelectorAll('.nav-btn')
         };
     }
 
     bindEvents() {
-        this.elements.startBtn.addEventListener('click', () => this.startRegistration());
-        
-        // Обработчики для кнопок навигации
         this.elements.navButtons.forEach(button => {
             button.addEventListener('click', (e) => {
                 const screenName = e.currentTarget.dataset.screen;
-                if (screenName === 'profile') {
-                    this.showProfile();
-                } else if (screenName === 'discovery') {
-                    this.startDiscovery();
-                } else if (screenName === 'main') {
-                    this.showMainScreen();
-                }
+                this.switchScreen(screenName);
             });
         });
 
-        // Кнопка "Вернуться в профиль" на экране "Нет анкет"
         const backToProfileFromDiscoveryBtn = document.getElementById('backToProfileFromDiscoveryBtn');
         if (backToProfileFromDiscoveryBtn) {
-            backToProfileFromDiscoveryBtn.addEventListener('click', () => this.showProfile());
+            backToProfileFromDiscoveryBtn.addEventListener('click', () => this.switchScreen('profile'));
+        }
+
+        const clearDataBtn = document.getElementById('clearDataBtn');
+        if (clearDataBtn) {
+            clearDataBtn.addEventListener('click', () => {
+                if (confirm('Вы уверены, что хотите полностью очистить все данные профиля? Это действие необратимо.')) {
+                    this.clearAllData();
+                }
+            });
         }
     }
 
@@ -143,6 +153,7 @@ class DatingApp {
         if (savedProfile) {
             try {
                 this.state.userData = JSON.parse(savedProfile);
+                // Убедимся, что массивы и предпочтения инициализированы, если они отсутствуют в старых данных
                 if (!Array.isArray(this.state.userData.interests)) {
                     this.state.userData.interests = [];
                 }
@@ -152,70 +163,93 @@ class DatingApp {
                 if (!this.state.userData.preference) {
                     this.state.userData.preference = 'both';
                 }
-                this.state.currentScreen = 'profile'; // Если профиль есть, начинаем с профиля
+                this.state.currentScreen = 'profile'; // Если профиль есть, показываем профиль
             } catch (e) {
                 console.error('Ошибка при загрузке профиля:', e);
-                localStorage.removeItem('datingProfile');
-                this.state.currentScreen = 'main'; // Если ошибка, начинаем с главного экрана
+                localStorage.removeItem('datingProfile'); // Очищаем некорректные данные
+                this.state.currentScreen = 'registration'; // Перенаправляем на регистрацию
             }
         } else {
-            this.state.currentScreen = 'main'; // Если профиля нет, начинаем с главного экрана
+            this.state.currentScreen = 'registration'; // Если профиля нет, начинаем регистрацию
         }
-    }
-
-    startRegistration() {
-        this.switchScreen('registration');
-        this.formHandler.renderForm();
     }
 
     showProfile() {
         this.profileHandler.showProfile();
-        this.switchScreen('profile');
     }
 
     startDiscovery() {
         this.discoveryHandler.startDiscovery();
-        this.switchScreen('discovery');
     }
 
-    showMainScreen() {
-        this.switchScreen('main');
+    clearAllData() {
+        localStorage.removeItem('datingProfile');
+        this.state.userData = {
+            name: '',
+            gender: '',
+            age: '',
+            zodiacSign: '',
+            city: '',
+            description: '',
+            interests: [],
+            lookingFor: [],
+            preference: 'both',
+            profileColor: '#FF6B6B',
+            avatar: null,
+            photos: [],
+            location: { lat: null, lng: null }
+        };
+        alert('Все данные профиля очищены. Вы будете перенаправлены на экран регистрации.');
+        this.switchScreen('registration');
     }
 
     switchScreen(screenName) {
-        // Деактивируем все экраны
-        this.elements.mainScreen.classList.remove('active');
-        this.elements.registrationForm.classList.remove('active');
-        this.elements.profileView.classList.remove('active');
-        this.elements.discoveryScreen.classList.remove('active');
+        // Скрываем все экраны и удаляем класс 'active'
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+            screen.style.display = 'none'; // Убедимся, что они скрыты
+        });
 
         // Деактивируем все кнопки навигации
         this.elements.navButtons.forEach(button => button.classList.remove('active'));
 
-        // Активируем нужный экран и кнопку навигации
-        if (screenName === 'main') {
-            this.elements.mainScreen.classList.add('active');
-            document.querySelector('.nav-btn[data-screen="main"]').classList.add('active');
-            this.elements.topNavigation.style.display = 'flex'; // Показываем навигацию
-        } else if (screenName === 'registration') {
-            this.elements.registrationForm.classList.add('active');
-            this.elements.topNavigation.style.display = 'none'; // Скрываем навигацию во время регистрации
+        // Показываем нужный экран
+        let targetScreenElement;
+        if (screenName === 'registration') {
+            targetScreenElement = this.elements.registrationForm;
+            this.elements.topNavigation.style.display = 'none';
+            this.formHandler.renderForm(); // Рендерим форму при переходе на экран регистрации
         } else if (screenName === 'profile') {
-            this.elements.profileView.classList.add('active');
+            targetScreenElement = this.elements.profileView;
             document.querySelector('.nav-btn[data-screen="profile"]').classList.add('active');
             this.elements.topNavigation.style.display = 'flex';
+            this.profileHandler.showProfile();
         } else if (screenName === 'discovery') {
-            this.elements.discoveryScreen.classList.add('active');
+            targetScreenElement = this.elements.discoveryScreen;
             document.querySelector('.nav-btn[data-screen="discovery"]').classList.add('active');
             this.elements.topNavigation.style.display = 'flex';
+            this.discoveryHandler.startDiscovery();
+        } else if (screenName === 'settings') {
+            targetScreenElement = this.elements.settingsScreen;
+            document.querySelector('.nav-btn[data-screen="settings"]').classList.add('active');
+            this.elements.topNavigation.style.display = 'flex';
         }
-        this.state.currentScreen = screenName; // Обновляем текущий активный экран
+
+        if (targetScreenElement) {
+            targetScreenElement.style.display = 'flex'; // Устанавливаем display: flex перед добавлением active
+            // Небольшая задержка для применения display: flex перед анимацией opacity/height
+            setTimeout(() => {
+                targetScreenElement.classList.add('active');
+            }, 10); 
+        }
+        
+        this.state.currentScreen = screenName;
     }
 
     calculateDistance(lat1, lon1, lat2, lon2) {
         if (!lat1 || !lon1 || !lat2 || !lon2) return null;
         
-        const R = 6371;
+        const R = 6371; // Радиус Земли в км
         const dLat = this.deg2rad(lat2-lat1);
         const dLon = this.deg2rad(lon2-lon1);
         const a = 

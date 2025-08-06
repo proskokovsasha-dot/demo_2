@@ -8,13 +8,12 @@ class FormHandler {
         localStorage.setItem('datingProfile', JSON.stringify(this.app.state.userData));
         
         document.documentElement.style.setProperty('--primary', color);
-        // Для корректного расчета primary-dark, нужно получить RGB компоненты
         const rgb = this.hexToRgb(color);
         if (rgb) {
             document.documentElement.style.setProperty('--primary-rgb', `${rgb.r},${rgb.g},${rgb.b}`);
         }
         document.documentElement.style.setProperty('--primary-dark', this.darkenColor(color, 20));
-        document.documentElement.style.setProperty('--primary-light', this.lightenColor(color, 40)); // Добавлено осветление
+        document.documentElement.style.setProperty('--primary-light', this.lightenColor(color, 40));
     }
 
     darkenColor(color, percent) {
@@ -470,12 +469,12 @@ class FormHandler {
         this.app.state.userData.profileColor = selectedColor;
         
         const darkerColor = this.darkenColor(selectedColor, 20);
-        const lighterColor = this.lightenColor(selectedColor, 40); // Используем новую функцию
+        const lighterColor = this.lightenColor(selectedColor, 40);
         const rgb = this.hexToRgb(selectedColor);
         
         document.documentElement.style.setProperty('--primary', selectedColor);
         document.documentElement.style.setProperty('--primary-dark', darkerColor);
-        document.documentElement.style.setProperty('--primary-light', lighterColor); // Устанавливаем новую переменную
+        document.documentElement.style.setProperty('--primary-light', lighterColor);
         if (rgb) {
             document.documentElement.style.setProperty('--primary-rgb', `${rgb.r},${rgb.g},${rgb.b}`);
         }
@@ -544,7 +543,6 @@ class FormHandler {
         
         if (nextStepEl) {
             nextStepEl.classList.add('active');
-            // nextStepEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); // Отключено, так как может мешать анимации
             this.focusCurrentField();
         }
     }
@@ -630,6 +628,6 @@ class FormHandler {
         this.saveStepData();
         
         localStorage.setItem('datingProfile', JSON.stringify(this.app.state.userData));
-        this.app.showProfile();
+        this.app.switchScreen('profile');
     }
 }

@@ -1,13 +1,12 @@
 class ProfileHandler {
     constructor(app) {
         this.app = app;
-        this.profileView = document.getElementById('profileView');
         this.initElements();
     }
 
     initElements() {
         this.elements = {
-            profileCard: document.querySelector('.profile-card'),
+            profileCard: document.querySelector('#profileView .profile-card'),
             profileName: document.getElementById('profileName'),
             profileAge: document.getElementById('profileAge'),
             profileZodiac: document.getElementById('profileZodiac'),
@@ -20,13 +19,12 @@ class ProfileHandler {
             profileAvatar: document.getElementById('profileAvatar'),
             editBtn: document.getElementById('editBtn'),
             newProfileBtn: document.getElementById('newProfileBtn')
-            // startDiscoveryBtn удален, так как он теперь в навигации
         };
     }
 
     showProfile() {
         const { userData } = this.app.state;
-        const profileColor = userData.profileColor || '#FF6B6B'; // Обновленный цвет по умолчанию
+        const profileColor = userData.profileColor || '#FF6B6B';
         
         this.applyProfileColor(profileColor);
         this.updateAvatar(userData.avatar);
@@ -39,13 +37,12 @@ class ProfileHandler {
 
     applyProfileColor(color) {
         document.documentElement.style.setProperty('--primary', color);
-        // Для корректного расчета primary-dark, нужно получить RGB компоненты
         const rgb = this.hexToRgb(color);
         if (rgb) {
             document.documentElement.style.setProperty('--primary-rgb', `${rgb.r},${rgb.g},${rgb.b}`);
         }
         document.documentElement.style.setProperty('--primary-dark', this.darkenColor(color, 20));
-        document.documentElement.style.setProperty('--primary-light', this.lightenColor(color, 40)); // Добавлено осветление
+        document.documentElement.style.setProperty('--primary-light', this.lightenColor(color, 40));
     }
 
     darkenColor(color, percent) {
@@ -92,6 +89,8 @@ class ProfileHandler {
         if (userData.zodiacSign) {
             const zodiac = this.app.config.zodiacSigns.find(z => z.id === userData.zodiacSign);
             this.elements.profileZodiac.textContent = zodiac ? `, ${zodiac.name}` : '';
+        } else {
+            this.elements.profileZodiac.textContent = '';
         }
         
         this.elements.profileCity.textContent = userData.city ? `, ${userData.city}` : '';
@@ -105,9 +104,11 @@ class ProfileHandler {
             );
             if (distance) {
                 this.elements.profileDistance.textContent = `, ~${distance} км от вас`;
+            } else {
+                this.elements.profileDistance.textContent = '';
             }
         } else {
-            this.elements.profileDistance.textContent = ''; // Очищаем, если нет данных
+            this.elements.profileDistance.textContent = '';
         }
         
         this.elements.profileDescription.textContent = userData.description || 'Пользователь пока ничего о себе не рассказал';
@@ -203,23 +204,15 @@ class ProfileHandler {
     }
 
     bindEvents() {
-        // Проверяем, был ли уже добавлен слушатель, чтобы избежать дублирования
-        if (!this.elements.editBtn.dataset.listenerAdded) {
-            this.elements.editBtn.addEventListener('click', () => {
-                this.app.switchScreen('registration');
-                this.app.formHandler.renderForm();
-            });
-            this.elements.editBtn.dataset.listenerAdded = true; // Помечаем, что слушатель добавлен
-        }
+        this.elements.editBtn.addEventListener('click', () => {
+            this.app.switchScreen('registration');
+        });
 
-        if (!this.elements.newProfileBtn.dataset.listenerAdded) {
-            this.elements.newProfileBtn.addEventListener('click', () => {
-                if (confirm('Вы уверены, что хотите создать новый профиль? Текущие данные будут удалены.')) {
-                    this.resetProfile();
-                }
-            });
-            this.elements.newProfileBtn.dataset.listenerAdded = true; // Помечаем, что слушатель добавлен
-        }
+        this.elements.newProfileBtn.addEventListener('click', () => {
+            if (confirm('Вы уверены, что хотите создать новый профиль? Текущие данные будут удалены.')) {
+                this.resetProfile();
+            }
+        });
     }
 
     resetProfile() {
@@ -233,7 +226,7 @@ class ProfileHandler {
             interests: [],
             lookingFor: [],
             preference: 'both',
-            profileColor: '#FF6B6B', // Сброс на новый дефолтный цвет
+            profileColor: '#FF6B6B',
             avatar: null,
             photos: [],
             location: { lat: null, lng: null }
@@ -241,6 +234,5 @@ class ProfileHandler {
         
         localStorage.removeItem('datingProfile');
         this.app.switchScreen('registration');
-        this.app.formHandler.renderForm();
     }
 }

@@ -32,24 +32,27 @@ body {
     font-family: 'Inter', sans-serif;
     background-color: var(--background);
     color: var(--text-primary);
-    line-height: 1.6; /* Увеличена межстрочная высота */
+    line-height: 1.6;
     min-height: 100vh;
     display: flex;
-    flex-direction: column; /* Для размещения навигации сверху */
-    justify-content: flex-start;
+    flex-direction: column;
+    justify-content: center; /* Центрируем содержимое по вертикали */
     align-items: center;
-    overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
+    overflow-x: hidden;
 }
 
 .app-container {
     width: 100%;
     max-width: 500px;
     margin: 0 auto;
-    padding: 20px; /* Общий паддинг для контента */
+    padding: 0 20px 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex-grow: 1; /* Занимает оставшееся пространство */
+    flex-grow: 1;
+    position: relative;
+    min-height: 100vh; /* Занимаем всю высоту */
+    justify-content: center; /* Центрируем содержимое по вертикали */
 }
 
 .loading-screen {
@@ -66,7 +69,10 @@ body {
     opacity: 0;
     height: 0;
     overflow: hidden;
-    padding-top: 20px; /* Добавляем отступ сверху для контента под навигацией */
+    padding-top: 20px;
+    padding-bottom: 20px; /* Добавляем паддинг снизу */
+    flex-grow: 1;
+    justify-content: center; /* Центрируем содержимое по вертикали */
 }
 
 .screen.active {
@@ -76,34 +82,34 @@ body {
 }
 
 .app-title {
-    font-size: 2.8rem; /* Увеличен размер */
-    font-weight: 800; /* Более жирный */
+    font-size: 2.8rem;
+    font-weight: 800;
     color: var(--primary);
     margin-bottom: 16px;
     line-height: 1.2;
-    letter-spacing: -0.03em; /* Небольшой кернинг */
+    letter-spacing: -0.03em;
 }
 
 .app-subtitle {
-    font-size: 1.2rem; /* Увеличен размер */
+    font-size: 1.2rem;
     color: var(--text-secondary);
-    margin-bottom: 40px; /* Увеличен отступ */
+    margin-bottom: 40px;
     max-width: 360px;
 }
 
 .section-title {
     font-size: 1.8rem;
     font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--text-primary); /* Изменен цвет на основной текст */
-    text-align: center; /* Центрируем заголовки секций */
+    margin-bottom: 15px; /* Уменьшен отступ */
+    color: var(--text-primary);
+    text-align: center;
 }
 
 .section-description {
     font-size: 1rem;
     color: var(--text-secondary);
-    margin-bottom: 24px;
-    text-align: center; /* Центрируем описания секций */
+    margin-bottom: 20px; /* Уменьшен отступ */
+    text-align: center;
 }
 
 /* Стили для верхнего навигационного меню */
@@ -119,6 +125,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 999;
+    flex-shrink: 0;
 }
 
 .nav-btn {
@@ -164,11 +171,11 @@ body {
 
 @media (max-width: 480px) {
     body {
-        padding: 0; /* Убираем паддинг с body */
+        padding: 0;
     }
     
     .app-container {
-        padding: 16px; /* Паддинг для контента на мобильных */
+        padding: 0 16px 16px;
     }
 
     .app-title {
@@ -177,6 +184,12 @@ body {
     
     .section-title {
         font-size: 1.6rem;
+        margin-bottom: 10px; /* Еще уменьшен отступ */
+    }
+
+    .section-description {
+        font-size: 0.95rem;
+        margin-bottom: 15px; /* Еще уменьшен отступ */
     }
 
     .top-navigation {
@@ -190,6 +203,11 @@ body {
     .nav-btn svg {
         width: 20px;
         height: 20px;
+    }
+
+    .screen {
+        padding-top: 16px;
+        padding-bottom: 16px;
     }
 }
 
